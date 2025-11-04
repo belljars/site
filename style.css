@@ -1,0 +1,147 @@
+html, body {
+    margin: 0;
+    padding: 10px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    color: black;
+}
+
+main {
+    flex: 1 0 auto;
+    width: 700px;
+}
+
+#sidebar {
+    flex: 0 0 auto;
+    width: 200px;
+    border: 1px solid;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+#nav {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-list li {
+    margin: 0;
+}
+
+.nav-list a {
+    text-decoration: none;
+}
+
+#footer {
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-copyright {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+main {
+    border: 1px solid;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+main.scroll-0 {
+    flex: 0 0 16em;
+    overflow-y: auto;
+    height: 16em;
+    max-height: 16em;
+}
+
+* {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    main {
+        width: 100%;
+        margin: 1rem 0;
+        padding: 0.5rem;
+    }
+
+    #sidebar {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .nav-list {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    main.scroll-0 {
+    flex: 0 0 18em;
+    overflow-y: auto;
+    height: 18em;
+    max-height: 18em;
+}
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: black;
+        color: white;
+    }
+
+    #sidebar {
+        border-color: white;
+    }
+
+    main {
+        border-color: white;
+    }
+
+    .nav-list a {
+        color: white;
+    }
+
+    .footer-links a {
+        color: white;
+    }
+}
