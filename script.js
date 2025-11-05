@@ -5,9 +5,8 @@ const navigationLinks = [
 ];
 
 const footerContent = {
-    copyright: `© ${new Date().getFullYear()} belljars`,
+    copyright: `© ${new Date().getFullYear()}  only-skin`,
     links: [
-        { text: 'email', url: 'mailto:szalonek99@gmail.com' },
         { text: 'set beliefs', url: 'beliefs.html' }
     ]
 };
