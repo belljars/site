@@ -1,12 +1,10 @@
-// Navigation menu data - edit this array to update the navigation links
 const navigationLinks = [
     { text: 'home', url: 'home.html' },
     { text: 'things', url: 'things.html' }
 ];
 
-// Footer content - edit this object to update the footer
 const footerContent = {
-    copyright: `© ${new Date().getFullYear()} Your Website Name`,
+    copyright: `© ${new Date().getFullYear()} belljars`,
     links: [
         { text: 'source', url: 'https://github.com/belljars/site' },
         { text: 'email', url: 'mailto:szalonek99@gmail.com' },
@@ -14,7 +12,6 @@ const footerContent = {
     ]
 };
 
-// Function to generate the navigation menu
 function generateNavigation() {
     const navElement = document.getElementById('nav');
     if (!navElement) return;
@@ -36,12 +33,10 @@ function generateNavigation() {
     navElement.appendChild(navList);
 }
 
-// Function to generate the footer
 function generateFooter() {
     const footerElement = document.getElementById('footer');
     if (!footerElement) return;
 
-    // Create footer sections
     const copyright = document.createElement('div');
     copyright.className = 'footer-copyright';
     copyright.textContent = footerContent.copyright;
@@ -55,12 +50,10 @@ function generateFooter() {
         links.appendChild(a);
     });
 
-    // Append all sections to footer
     footerElement.appendChild(copyright);
     footerElement.appendChild(links);
 }
 
-// Generate both navigation and footer when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     generateNavigation();
     generateFooter();

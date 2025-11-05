@@ -87,6 +87,34 @@ img {
     margin: 0 auto;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+table, th, td {
+  border: 1px solid;
+}
+table th, table td {
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.image-text-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.image-text-container img {
+    flex-shrink: 0;
+}
+
+.image-text-container p {
+    margin: 0;
+}
+
 /* Responsive styling */
 @media (max-width: 768px) {
     body {
