@@ -93,6 +93,10 @@ img {
   border-bottom: 1px dotted black;
 }
 
+code {
+    font-weight: 100;
+}
+
 table, th, td {
   border: 1px solid;
 }
@@ -172,4 +176,8 @@ table th, table td {
     .footer-links a {
         color: white;
     }
+
+    img.mode {
+    filter: invert(1);
+}
 }
