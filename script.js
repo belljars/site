@@ -7,7 +7,6 @@ const navigationLinks = [
 const footerContent = {
     copyright: `© ${new Date().getFullYear()} belljars`,
     links: [
-        { text: 'source', url: 'https://github.com/belljars/site' },
         { text: 'email', url: 'mailto:szalonek99@gmail.com' },
         { text: 'set beliefs', url: 'beliefs.html' }
     ]
