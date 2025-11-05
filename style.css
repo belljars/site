@@ -2,7 +2,6 @@ html, body {
     margin: 0;
     padding: 10px;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
 body {
@@ -15,6 +14,29 @@ body {
 main {
     flex: 1 0 auto;
     width: 700px;
+}
+
+h1, h2, h3, h4, h5, h6, p, ul, li {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    margin-bottom: 0.75rem;
+}
+
+ul, li {
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+textarea {
+    width: 60%;
+    box-sizing: border-box;
+    border: 1px solid;
+    padding: 0.5rem;
+    background-color: white;
+    color: black;
 }
 
 #sidebar {
@@ -44,6 +66,18 @@ main {
 
 .nav-list a {
     text-decoration: none;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+    border-bottom: 1px dotted black;
+}
+
+a:hover {
+    color: white;
+    background-color: black;
+    border-bottom: 1px dotted white;
 }
 
 #footer {
@@ -77,6 +111,13 @@ main.scroll-0 {
     max-height: 16em;
 }
 
+main.scroll-01 {
+    flex: 0 0 40em;
+    overflow-y: auto;
+    height: 40em;
+    max-height: 40rem;
+}
+
 * {
     box-sizing: border-box;
     max-width: 100%;
@@ -91,6 +132,11 @@ img {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted black;
+}
+
+pre {
+    border: double;
+    padding: 0.5rem;
 }
 
 code {
@@ -118,6 +164,27 @@ table th, table td {
 .image-text-container p {
     margin: 0;
 }
+
+button {
+  background-color: white;
+  border: none;
+  color: black;
+  border-bottom: 1px dotted black;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+button:hover {
+    background-color: black;
+    color: white;
+    border-bottom: 1px dotted white;
+}
+
+
 
 /* Responsive styling */
 @media (max-width: 768px) {
@@ -154,7 +221,6 @@ table th, table td {
 }
 }
 
-/* Dark mode styles */
 @media (prefers-color-scheme: dark) {
     body {
         background-color: black;
@@ -177,7 +243,43 @@ table th, table td {
         color: white;
     }
 
+    a {
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px dotted white;
+    }
+
+    a:hover {
+    color: black;
+    background-color: white;
+    border-bottom: 1px dotted black;
+    }
+
     img.mode {
     filter: invert(1);
-}
+    }
+
+    button {
+    background-color: black;
+    border: none;
+    color: white;
+    border-bottom: 1px dotted white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    }
+    button:hover {
+    background-color: white;
+    color: black;
+    border-bottom: 1px dotted black;
+    }
+
+    textarea {
+    background-color: black;
+    color: white;
+    border: 1px solid white;
+    }
 }

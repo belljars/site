@@ -1,5 +1,6 @@
 const navigationLinks = [
     { text: 'home', url: 'home.html' },
+    { text: 'about', url: 'about.html' },
     { text: 'things', url: 'things.html' }
 ];
 
