@@ -9,6 +9,7 @@ body {
     flex-direction: column;
     background-color: white;
     color: black;
+    align-items: center;
 }
 
 main {
@@ -41,7 +42,7 @@ textarea {
 
 #sidebar {
     flex: 0 0 auto;
-    width: 200px;
+    width: 700px;
     border: 1px solid;
     padding: 1rem;
     box-sizing: border-box;

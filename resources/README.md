@@ -1,0 +1,3 @@
+# Free resources
+- free web resources for coding your own blog with ease!
+- Credit not necessary, but appreciated...
