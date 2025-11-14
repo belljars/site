@@ -15,6 +15,15 @@ function generateNavigation() {
     const navElement = document.getElementById('nav');
     if (!navElement) return;
 
+    // Create and insert the image BEFORE the link list
+    const img = document.createElement('img');
+    img.src = '/img/image.png';
+    img.alt = 'navigation image';
+    img.width = 190;
+    img.height = 190;
+    img.style.display = 'block'; // prevents weird inline spacing
+    navElement.appendChild(img);
+
     const navList = document.createElement('ul');
     navList.className = 'nav-list';
 
@@ -31,6 +40,7 @@ function generateNavigation() {
 
     navElement.appendChild(navList);
 }
+
 
 function generateFooter() {
     const footerElement = document.getElementById('footer');
