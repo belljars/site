@@ -1,0 +1,10 @@
+{
+  "context": [
+    {
+      "name": "site-name",
+      "author": "author",
+      "url": "www.site-name.com",
+      "footer_html": "<footer> site-name </footer>"
+    }
+  ]
+}

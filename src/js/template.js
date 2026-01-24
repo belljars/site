@@ -1,18 +1,25 @@
 const { escapeHtml } = require("./utils");
-const config = require("./config");
 
-function templateHtml({ title, nav, content, backlinks, styleHref }) {
+function templateHtml({
+  title,
+  nav,
+  content,
+  backlinks,
+  styleHref,
+  siteTitle,
+  footerHtml,
+}) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)} | ${escapeHtml(config.siteTitle)}</title>
+  <title>${escapeHtml(title)} | ${escapeHtml(siteTitle)}</title>
   <link rel="stylesheet" href="${styleHref}" />
 </head>
 <body>
   <header class="site-header">
-    <div class="site-title">${escapeHtml(config.siteTitle)}</div>
+    <div class="site-title">${escapeHtml(siteTitle)}</div>
   </header>
   <div class="layout">
     <nav class="sidebar">
@@ -32,6 +39,7 @@ function templateHtml({ title, nav, content, backlinks, styleHref }) {
       }
     </main>
   </div>
+  ${footerHtml || ""}
 </body>
 </html>`;
 }

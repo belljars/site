@@ -10,6 +10,29 @@ const { writeAssets } = require("./assets");
 const { toPosixPath, relativeLink } = require("./utils");
 
 async function main() {
+  let siteTitle = config.siteTitle;
+  let footerHtml = "";
+  try {
+    const metaRaw = await fs.readFile(
+      path.join(config.rootDir, "meta.json"),
+      "utf8"
+    );
+    const meta = JSON.parse(metaRaw);
+    const context = Array.isArray(meta.context) ? meta.context[0] : null;
+    if (context && typeof context === "object") {
+      if (typeof context.name === "string" && context.name.trim()) {
+        siteTitle = context.name.trim();
+      }
+      if (typeof context.footer_html === "string") {
+        footerHtml = context.footer_html;
+      }
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+
   await fs.rm(config.outputDir, { recursive: true, force: true });
   await fs.mkdir(config.assetsDir, { recursive: true });
 
@@ -60,6 +83,8 @@ async function main() {
       content: contentHtml,
       backlinks: null,
       styleHref,
+      siteTitle,
+      footerHtml,
     });
 
     await fs.mkdir(path.dirname(file.outPath), { recursive: true });
