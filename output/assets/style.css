@@ -1,0 +1,154 @@
+/* Root and global tokens */
+:root {
+  /* color: ; */
+  /* background-color: ; */
+  /* font-family: ; */
+  /* line-height: ; */
+}
+
+/* Base typography */
+body {
+  /* margin: ; */
+  /* padding: ; */
+  /* font-family: ; */
+  /* font-size: ; */
+  /* line-height: ; */
+  /* color: ; */
+  /* background-color: ; */
+}
+
+/* Header */
+.site-header {
+  /* padding: ; */
+  /* margin: ; */
+  /* border-bottom: ; */
+  /* background-color: ; */
+}
+
+.site-title {
+  /* font-size: ; */
+  /* font-weight: ; */
+  /* letter-spacing: ; */
+}
+
+/* Layout */
+.layout {
+  /* display: ; */
+  /* gap: ; */
+  /* align-items: ; */
+}
+
+.sidebar {
+  /* width: ; */
+  /* padding: ; */
+  /* border-right: ; */
+  /* background-color: ; */
+}
+
+.content {
+  /* flex: ; */
+  /* padding: ; */
+  /* max-width: ; */
+}
+
+/* Navigation */
+.nav-tree {
+  /* list-style: ; */
+  /* margin: ; */
+  /* padding: ; */
+}
+
+.nav-tree ul {
+  /* list-style: ; */
+  /* margin: ; */
+  /* padding-left: ; */
+}
+
+.nav-dir summary {
+  /* cursor: ; */
+}
+
+.nav-file a {
+  /* color: ; */
+  /* text-decoration: ; */
+}
+
+.nav-file a.active {
+  /* font-weight: ; */
+}
+
+/* Content elements */
+article {
+  /* max-width: ; */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* margin: ; */
+  /* font-weight: ; */
+}
+
+p {
+  /* margin: ; */
+}
+
+a {
+  /* color: ; */
+  /* text-decoration: ; */
+}
+
+ul,
+ol {
+  /* margin: ; */
+  /* padding-left: ; */
+}
+
+code,
+pre {
+  /* font-family: ; */
+  /* font-size: ; */
+}
+
+pre {
+  /* padding: ; */
+  /* overflow: ; */
+}
+
+blockquote {
+  /* margin: ; */
+  /* padding-left: ; */
+  /* border-left: ; */
+}
+
+img {
+  /* max-width: ; */
+  /* height: ; */
+}
+
+table {
+  /* border-collapse: ; */
+  /* width: ; */
+}
+
+th,
+td {
+  /* border: ; */
+  /* padding: ; */
+  /* text-align: ; */
+}
+
+/* Backlinks */
+.backlinks {
+  /* margin-top: ; */
+  /* padding-top: ; */
+  /* border-top: ; */
+}
+
+.backlinks h3 {
+  /* margin: ; */
+  /* font-size: ; */
+}

@@ -22,8 +22,15 @@ async function writeAssets() {
 
   await fs.writeFile(path.join(config.assetsDir, "style.css"), css, "utf8");
 
-  const outputFontDir = path.join(config.outputDir, "font");
-  await copyDir(config.fontDir, outputFontDir);
+  try {
+    await fs.access(config.fontDir);
+    const outputFontDir = path.join(config.outputDir, "font");
+    await copyDir(config.fontDir, outputFontDir);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
 }
 
 module.exports = {
