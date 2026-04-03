@@ -9,3 +9,5 @@ Highly customizable in `src/css/base.css`
 node build.js
 ```
 It will rebuild `output` folder, which the HTML site will be located in, so there is no need for manual deletion.
+
+`meta.json` supports a plain-text `footer` field for footer content.

@@ -7,7 +7,7 @@ function templateHtml({
   backlinks,
   styleHref,
   siteTitle,
-  footerHtml,
+  footerText,
 }) {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -39,7 +39,11 @@ function templateHtml({
       }
     </main>
   </div>
-  ${footerHtml || ""}
+  ${
+    footerText
+      ? `<footer class="site-footer">${escapeHtml(footerText)}</footer>`
+      : ""
+  }
 </body>
 </html>`;
 }
