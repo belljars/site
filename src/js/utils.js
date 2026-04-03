@@ -21,13 +21,8 @@ function relativeLink(fromPath, toPath) {
   return toPosixPath(rel);
 }
 
-function stripHtml(html) {
-  return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-}
-
 module.exports = {
   toPosixPath,
   escapeHtml,
   relativeLink,
-  stripHtml,
 };

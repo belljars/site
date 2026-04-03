@@ -19,7 +19,7 @@ function inlineParse(text) {
   output = output.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
     return `<a href="${escapeHtml(url)}">${label}</a>`;
   });
-  output = output.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  output = output.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   output = output.replace(/\*([^*]+)\*/g, "<em>$1</em>");
   output = output.replace(/@@CODESPAN_(\d+)@@/g, (_, index) => {
     const code = codeSpans[Number(index)] || "";
