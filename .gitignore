@@ -1,0 +1,14 @@
+# Keep the directories, ignore their contents
+content/*
+!content/
+!content/.gitignore
+
+output/*
+!output/
+!output/.gitignore
+
+# AI code editor files
+.cursor/
+.windsurf/
+.claude/
+.continue/
