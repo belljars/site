@@ -69,27 +69,95 @@ function replaceMarkdownLinks(text) {
   return output;
 }
 
+function protectPatterns(text, pattern, tokenPrefix, values) {
+  return text.replace(pattern, (match) => {
+    const token = `@@${tokenPrefix}_${values.length}@@`;
+    values.push(match);
+    return token;
+  });
+}
+
+function restoreProtectedTokens(text, tokenPrefix, values) {
+  return text.replace(new RegExp(`@@${tokenPrefix}_(\\d+)@@`, "g"), (_, index) => {
+    return values[Number(index)] || "";
+  });
+}
+
+function applyDelimitedFormatting(text, delimiter, tagName) {
+  const escapedDelimiter = delimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `(^|[^A-Za-z0-9])${escapedDelimiter}([^${escapedDelimiter}\\s](?:.*?[^${escapedDelimiter}\\s])?)${escapedDelimiter}(?![A-Za-z0-9])`,
+    "g"
+  );
+
+  return text.replace(pattern, (_, prefix, content) => {
+    return `${prefix}<${tagName}>${content}</${tagName}>`;
+  });
+}
+
+function autolinkBareUrls(text) {
+  return text.replace(/(^|[\s(>])((https?:\/\/)[^\s<]+)/g, (match, prefix, url) => {
+    const trailingMatch = url.match(/[),.!?;:]+$/);
+    const trailing = trailingMatch ? trailingMatch[0] : "";
+    const cleanUrl = trailing ? url.slice(0, -trailing.length) : url;
+    return `${prefix}<a href="${cleanUrl}">${cleanUrl}</a>${trailing}`;
+  });
+}
+
+function isRawHtmlLine(line) {
+  return /^(?:<!--[\s\S]*-->|<\/?[A-Za-z][\w:-]*(?:\s[^>]*)?\s*\/?>|<([A-Za-z][\w:-]*)(?:\s[^>]*)?>.*<\/\1>)$/.test(
+    line
+  );
+}
+
+function getRawHtmlBlockOpenTag(line) {
+  const match = line.match(/^<([A-Za-z][\w:-]*)(?:\s[^>]*)?>$/);
+  if (!match || /\/>$/.test(line) || /^<\//.test(line)) {
+    return "";
+  }
+  return match[1].toLowerCase();
+}
+
 function inlineParse(text) {
   if (!text) {
     return "";
   }
 
   const codeSpans = [];
+  const rawHtml = [];
+  const htmlTags = [];
   let output = text.replace(/`([^`]+)`/g, (_, code) => {
     const token = `@@CODESPAN_${codeSpans.length}@@`;
     codeSpans.push(code);
     return token;
   });
 
+  output = protectPatterns(
+    output,
+    /<!--[\s\S]*?-->|<\/?[A-Za-z][\w:-]*(?:\s[^>]*)?>/g,
+    "RAWHTML",
+    rawHtml
+  );
   output = escapeHtml(output);
   output = replaceMarkdownLinks(output);
-  output = output.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  output = protectPatterns(
+    output,
+    /<\/?[A-Za-z][\w:-]*(?:\s[^>]*)?>/g,
+    "HTMLTAG",
+    htmlTags
+  );
+  output = applyDelimitedFormatting(output, "**", "strong");
+  output = applyDelimitedFormatting(output, "__", "strong");
   output = output.replace(/~~(.+?)~~/g, "<del>$1</del>");
-  output = output.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  output = applyDelimitedFormatting(output, "*", "em");
+  output = applyDelimitedFormatting(output, "_", "em");
   output = output.replace(
     /&lt;(https?:\/\/[^<\s]+)&gt;/g,
     '<a href="$1">$1</a>'
   );
+  output = autolinkBareUrls(output);
+  output = restoreProtectedTokens(output, "HTMLTAG", htmlTags);
+  output = restoreProtectedTokens(output, "RAWHTML", rawHtml);
   output = output.replace(/@@CODESPAN_(\d+)@@/g, (_, index) => {
     const code = codeSpans[Number(index)] || "";
     return `<code>${escapeHtml(code)}</code>`;
@@ -138,6 +206,7 @@ function markdownToHtml(markdown) {
   let inCodeBlock = false;
   let codeLanguage = "";
   let inBlockquote = false;
+  let rawHtmlBlockTag = "";
   let paragraph = [];
   const listStack = [];
   const headingCounts = new Map();
@@ -233,6 +302,14 @@ function markdownToHtml(markdown) {
       continue;
     }
 
+    if (rawHtmlBlockTag) {
+      html.push(line);
+      if (trimmed.toLowerCase() === `</${rawHtmlBlockTag}>`) {
+        rawHtmlBlockTag = "";
+      }
+      continue;
+    }
+
     if (inBlockquote && !trimmed.startsWith(">")) {
       closeBlockquote();
     }
@@ -249,6 +326,24 @@ function markdownToHtml(markdown) {
       closeAllLists();
       closeBlockquote();
       html.push("<hr />");
+      continue;
+    }
+
+    const rawHtmlOpenTag = getRawHtmlBlockOpenTag(trimmed);
+    if (rawHtmlOpenTag) {
+      flushParagraph();
+      closeAllLists();
+      closeBlockquote();
+      rawHtmlBlockTag = rawHtmlOpenTag;
+      html.push(line);
+      continue;
+    }
+
+    if (isRawHtmlLine(trimmed)) {
+      flushParagraph();
+      closeAllLists();
+      closeBlockquote();
+      html.push(line);
       continue;
     }
 
