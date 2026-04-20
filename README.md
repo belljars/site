@@ -12,23 +12,38 @@ It will rebuild `output` folder, which the HTML site will be located in, so ther
 
 `meta.json` supports a plain-text `footer` field for footer content.
 
-## markdown support
+## index page
 
-| Format | Status | Notes |
-| --- | --- | --- |
-| Paragraphs | Supported | Blank lines split paragraphs |
-| Headings (`#`-`######`) | Supported | Generates heading `id` attributes |
-| Fenced code blocks | Supported | Triple backticks only; optional language class |
-| Inline code | Supported | Single backticks |
-| Raw HTML | Supported | Passed through for inline tags and HTML blocks |
-| Bold | Supported | `**text**` and `__text__` |
-| Italic | Supported | `*text*` and `_text_` |
-| Strikethrough | Supported | `~~text~~` |
-| Links | Supported | `[label](url)` |
-| Images | Supported | `![alt](url)` |
-| Autolinks | Supported | Bare URLs and angle-bracket URLs like `<https://example.com>` |
-| Horizontal rules | Supported | `---` on its own line |
-| Blockquotes | Supported | `>` lines |
-| Ordered and unordered lists | Supported | `1.`, `-`, `*`, `+`, with indentation-based nesting |
-| Task lists | Supported | `[ ]` and `[x]` inside list items |
-| Tables | Supported | Pipe tables with alignment markers |
+The build always writes an `index.html` page. If `content/index.md` exists, its Markdown is rendered at the top of the page. If it does not exist, a default index introduction is generated.
+
+After the optional Markdown content, the index page includes a generated `Posts` directory with links to every content page except the index page itself.
+
+## supported markdown
+
+- Headings: `#` through `######`
+- Paragraphs
+- Fenced code blocks with optional language names
+- Inline code
+- Raw HTML passthrough for inline tags and HTML blocks
+- Bold, italic, and strikethrough
+- Underscore emphasis with `__bold__` and `_italic_`
+- Links and images
+- Autolinked URLs such as `<https://example.com>` and bare `https://example.com`
+- Horizontal rules with `---`
+- Blockquotes
+- Definition lists with `Term` followed by `: Definition`
+- Footnotes with `[^id]` references and `[^id]: Note` definitions
+- Ordered and unordered lists
+- Nested lists by indentation
+- Task list items with `[ ]` and `[x]`
+- Tables with pipe syntax
+- Escaped Markdown punctuation, such as `\*literal asterisks\*`
+
+```markdown
+| Name | Count | Status |
+| :--- | ----: | :----: |
+| Alpha | 12 | Ready |
+| Beta | 7 | Draft |
+```
+
+Table alignment is controlled by the divider row: `:---` for left, `---:` for right, and `:---:` for centered.

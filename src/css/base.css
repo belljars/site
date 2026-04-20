@@ -140,15 +140,37 @@ footer {
 }
 
 table {
+    border: 1px solid;
   /* border-collapse: ; */
   /* width: ; */
 }
 
 th,
 td {
-  /* border: ; */
+  border: 1px solid;
   /* padding: ; */
   /* text-align: ; */
+}
+
+/* Generated index */
+.post-directory {
+  /* margin-top: ; */
+  /* padding-top: ; */
+  /* border-top: ; */
+}
+
+.post-dir {
+  /* font-weight: ; */
+}
+
+.post-directory ul {
+  /* list-style: ; */
+  /* margin: ; */
+  /* padding-left: ; */
+}
+
+.post-directory a {
+  /* color: ; */
 }
 
 /* Backlinks */

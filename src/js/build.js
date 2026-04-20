@@ -7,7 +7,86 @@ const { markdownToHtml } = require("./markdown");
 const { buildNavTree, buildNavHtml } = require("./nav");
 const { templateHtml } = require("./template");
 const { writeAssets } = require("./assets");
-const { toPosixPath, relativeLink } = require("./utils");
+const { escapeHtml, toPosixPath, relativeLink } = require("./utils");
+
+function createIndexEntry(config, siteTitle) {
+  return {
+    absPath: null,
+    relPathNoExt: config.indexName,
+    slugLower: config.indexName.toLowerCase(),
+    title: "Index",
+    frontmatter: {},
+    body: "",
+    outPath: path.join(config.outputDir, `${config.indexName}.html`),
+    generated: true,
+  };
+}
+
+function buildIndexDirectoryHtml(currentFile, fileIndex) {
+  const posts = Array.from(fileIndex.values())
+    .filter((file) => file.slugLower !== config.indexName.toLowerCase())
+    .sort((a, b) => a.relPathNoExt.localeCompare(b.relPathNoExt));
+
+  if (!posts.length) {
+    return '<section class="post-directory"><h2>Posts</h2><p>No posts yet.</p></section>';
+  }
+
+  const root = { type: "dir", name: "", children: [] };
+
+  const getOrCreateDir = (parent, name) => {
+    let node = parent.children.find(
+      (child) => child.type === "dir" && child.name === name
+    );
+    if (!node) {
+      node = { type: "dir", name, children: [] };
+      parent.children.push(node);
+    }
+    return node;
+  };
+
+  for (const file of posts) {
+    const segments = file.relPathNoExt.split("/");
+    let current = root;
+    for (let index = 0; index < segments.length; index += 1) {
+      const segment = segments[index];
+      const isLast = index === segments.length - 1;
+      if (isLast) {
+        current.children.push({ type: "file", name: segment, file });
+      } else {
+        current = getOrCreateDir(current, segment);
+      }
+    }
+  }
+
+  const renderChildren = (children) => {
+    children.sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === "dir" ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    const items = children
+      .map((child) => {
+        if (child.type === "dir") {
+          return (
+            `<li><span class="post-dir">${escapeHtml(child.name)}</span>` +
+            `${renderChildren(child.children)}</li>`
+          );
+        }
+
+        const href = relativeLink(currentFile.outPath, child.file.outPath);
+        return `<li><a href="${href}">${escapeHtml(child.file.title)}</a></li>`;
+      })
+      .join("");
+
+    return `<ul>${items}</ul>`;
+  };
+
+  return `<section class="post-directory"><h2>Posts</h2>${renderChildren(
+    root.children
+  )}</section>`;
+}
 
 async function main() {
   let siteTitle = config.siteTitle;
@@ -77,6 +156,11 @@ async function main() {
       fileIndex.set(slugLower, entry);
     }
 
+    const indexSlug = config.indexName.toLowerCase();
+    if (!fileIndex.has(indexSlug)) {
+      fileIndex.set(indexSlug, createIndexEntry(config, siteTitle));
+    }
+
     const navTree = buildNavTree(fileIndex);
     tempOutputDir = await fs.mkdtemp(
       path.join(config.rootDir, `${path.basename(config.outputDir)}-tmp-`)
@@ -92,8 +176,14 @@ async function main() {
         tempOutPath,
         path.join(tempAssetsDir, "style.css")
       );
-      const navHtml = buildNavHtml(navTree, file, fileIndex);
-      const contentHtml = markdownToHtml(file.body);
+      const navHtml =
+        file.slugLower === indexSlug
+          ? ""
+          : buildNavHtml(navTree, file, fileIndex);
+      let contentHtml = markdownToHtml(file.body);
+      if (file.slugLower === indexSlug) {
+        contentHtml = `${contentHtml}\n${buildIndexDirectoryHtml(file, fileIndex)}`;
+      }
 
       const pageHtml = templateHtml({
         title: file.title,

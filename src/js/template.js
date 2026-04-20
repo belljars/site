@@ -22,9 +22,13 @@ function templateHtml({
     <div class="site-title">${escapeHtml(siteTitle)}</div>
   </header>
   <div class="layout">
-    <nav class="sidebar">
+    ${
+      nav
+        ? `<nav class="sidebar">
       ${nav}
-    </nav>
+    </nav>`
+        : ""
+    }
     <main class="content">
       <article>
         ${content}

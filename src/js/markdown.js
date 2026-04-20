@@ -118,7 +118,51 @@ function getRawHtmlBlockOpenTag(line) {
   return match[1].toLowerCase();
 }
 
-function inlineParse(text) {
+function normalizeFootnoteId(id) {
+  return id
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function collectFootnotes(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const contentLines = [];
+  const footnotes = new Map();
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const match = line.match(/^\[\^([^\]]+)\]:\s*(.*)$/);
+    if (!match) {
+      contentLines.push(line);
+      continue;
+    }
+
+    const id = match[1].trim();
+    const content = [match[2].trim()];
+
+    while (index + 1 < lines.length) {
+      const nextLine = lines[index + 1];
+      if (/^( {2,}|\t+)/.test(nextLine)) {
+        content.push(nextLine.trim());
+        index += 1;
+        continue;
+      }
+      break;
+    }
+
+    footnotes.set(id, content.join(" ").trim());
+  }
+
+  return {
+    markdown: contentLines.join("\n"),
+    footnotes,
+  };
+}
+
+function inlineParse(text, context = null) {
   if (!text) {
     return "";
   }
@@ -126,6 +170,7 @@ function inlineParse(text) {
   const codeSpans = [];
   const rawHtml = [];
   const htmlTags = [];
+  const escapedChars = [];
   let output = text.replace(/`([^`]+)`/g, (_, code) => {
     const token = `@@CODESPAN_${codeSpans.length}@@`;
     codeSpans.push(code);
@@ -138,8 +183,38 @@ function inlineParse(text) {
     "RAWHTML",
     rawHtml
   );
+  output = output.replace(/\\([\\`*{}\[\]()#+\-.!_|~>])/g, (_, char) => {
+    const token = `@@ESCAPED_${escapedChars.length}@@`;
+    escapedChars.push(char);
+    return token;
+  });
+
   output = escapeHtml(output);
   output = replaceMarkdownLinks(output);
+  output = output.replace(/\[\^([^\]]+)\]/g, (match, rawId) => {
+    if (!context || !context.footnotes.has(rawId)) {
+      return match;
+    }
+
+    const safeId = normalizeFootnoteId(rawId) || "note";
+    if (!context.footnoteOrder.includes(rawId)) {
+      context.footnoteOrder.push(rawId);
+    }
+
+    const referenceCount = (context.footnoteReferenceCounts.get(rawId) || 0) + 1;
+    context.footnoteReferenceCounts.set(rawId, referenceCount);
+    const referenceId =
+      referenceCount === 1
+        ? `fnref-${safeId}`
+        : `fnref-${safeId}-${referenceCount}`;
+
+    const footnoteNumber = context.footnoteOrder.indexOf(rawId) + 1;
+    return (
+      `<sup id="${referenceId}">` +
+      `<a href="#fn-${safeId}" class="footnote-ref">[${footnoteNumber}]</a>` +
+      "</sup>"
+    );
+  });
   output = protectPatterns(
     output,
     /<\/?[A-Za-z][\w:-]*(?:\s[^>]*)?>/g,
@@ -161,6 +236,10 @@ function inlineParse(text) {
   output = output.replace(/@@CODESPAN_(\d+)@@/g, (_, index) => {
     const code = codeSpans[Number(index)] || "";
     return `<code>${escapeHtml(code)}</code>`;
+  });
+  output = output.replace(/@@ESCAPED_(\d+)@@/g, (_, index) => {
+    const char = escapedChars[Number(index)] || "";
+    return escapeHtml(char);
   });
 
   return output;
@@ -201,19 +280,26 @@ function getTableAlignment(cell) {
 }
 
 function markdownToHtml(markdown) {
-  const lines = markdown.split(/\r?\n/);
+  const collected = collectFootnotes(markdown);
+  const lines = collected.markdown.split(/\r?\n/);
   const html = [];
   let inCodeBlock = false;
   let codeLanguage = "";
   let inBlockquote = false;
   let rawHtmlBlockTag = "";
+  let blockquoteParagraph = [];
   let paragraph = [];
   const listStack = [];
   const headingCounts = new Map();
+  const inlineContext = {
+    footnotes: collected.footnotes,
+    footnoteOrder: [],
+    footnoteReferenceCounts: new Map(),
+  };
 
   const flushParagraph = () => {
     if (paragraph.length) {
-      html.push(`<p>${inlineParse(paragraph.join(" "))}</p>`);
+      html.push(`<p>${inlineParse(paragraph.join(" "), inlineContext)}</p>`);
       paragraph = [];
     }
   };
@@ -246,8 +332,18 @@ function markdownToHtml(markdown) {
     }
   };
 
+  const flushBlockquoteParagraph = () => {
+    if (blockquoteParagraph.length) {
+      html.push(
+        `<p>${inlineParse(blockquoteParagraph.join(" "), inlineContext)}</p>`
+      );
+      blockquoteParagraph = [];
+    }
+  };
+
   const closeBlockquote = () => {
     if (inBlockquote) {
+      flushBlockquoteParagraph();
       html.push("</blockquote>");
       inBlockquote = false;
     }
@@ -261,7 +357,7 @@ function markdownToHtml(markdown) {
   const renderListItem = (itemText) => {
     const taskMatch = itemText.match(/^\[( |x|X)\]\s+(.+)$/);
     if (!taskMatch) {
-      return { className: "", content: inlineParse(itemText) };
+      return { className: "", content: inlineParse(itemText, inlineContext) };
     }
 
     const isChecked = taskMatch[1].toLowerCase() === "x";
@@ -270,8 +366,35 @@ function markdownToHtml(markdown) {
     } />`;
     return {
       className: ' class="task-list-item"',
-      content: `${checkbox} ${inlineParse(taskMatch[2])}`,
+      content: `${checkbox} ${inlineParse(taskMatch[2], inlineContext)}`,
     };
+  };
+
+  const renderFootnotes = () => {
+    if (!inlineContext.footnoteOrder.length) {
+      return;
+    }
+
+    html.push('<section class="footnotes">');
+    html.push("<hr />");
+    html.push("<ol>");
+    for (
+      let index = 0;
+      index < inlineContext.footnoteOrder.length;
+      index += 1
+    ) {
+      const rawId = inlineContext.footnoteOrder[index];
+      const safeId = normalizeFootnoteId(rawId) || "note";
+      const content = inlineContext.footnotes.get(rawId) || "";
+      html.push(
+        `<li id="fn-${safeId}">` +
+          `${inlineParse(content, inlineContext)} ` +
+          `<a href="#fnref-${safeId}" class="footnote-backref">Back</a>` +
+          "</li>"
+      );
+    }
+    html.push("</ol>");
+    html.push("</section>");
   };
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
@@ -361,8 +484,12 @@ function markdownToHtml(markdown) {
       html.push("<table>");
       html.push("<thead><tr>");
       for (let index = 0; index < headers.length; index += 1) {
-        const alignment = alignments[index] ? ` style="text-align: ${alignments[index]}"` : "";
-        html.push(`<th${alignment}>${inlineParse(headers[index])}</th>`);
+        const alignment = alignments[index]
+          ? ` style="text-align: ${alignments[index]}"`
+          : "";
+        html.push(
+          `<th${alignment}>${inlineParse(headers[index], inlineContext)}</th>`
+        );
       }
       html.push("</tr></thead>");
       html.push("<tbody>");
@@ -381,7 +508,9 @@ function markdownToHtml(markdown) {
             ? ` style="text-align: ${alignments[index]}"`
             : "";
           html.push(
-            `<td${alignment}>${inlineParse(cells[index] || "")}</td>`
+            `<td${alignment}>` +
+              `${inlineParse(cells[index] || "", inlineContext)}` +
+              "</td>"
           );
         }
         html.push("</tr>");
@@ -406,7 +535,9 @@ function markdownToHtml(markdown) {
       const headingId =
         duplicateCount === 0 ? baseSlug : `${baseSlug}-${duplicateCount + 1}`;
       html.push(
-        `<h${level} id="${headingId}">${inlineParse(headingText)}</h${level}>`
+        `<h${level} id="${headingId}">` +
+          `${inlineParse(headingText, inlineContext)}` +
+          `</h${level}>`
       );
       continue;
     }
@@ -419,7 +550,32 @@ function markdownToHtml(markdown) {
         inBlockquote = true;
       }
       const quoteText = trimmed.replace(/^>\s?/, "");
-      html.push(`<p>${inlineParse(quoteText)}</p>`);
+      if (quoteText.trim() === "") {
+        flushBlockquoteParagraph();
+      } else {
+        blockquoteParagraph.push(quoteText.trim());
+      }
+      continue;
+    }
+
+    if (
+      lineIndex + 1 < lines.length &&
+      /^ {0,3}:\s+(.+)$/.test(lines[lineIndex + 1])
+    ) {
+      flushParagraph();
+      closeAllLists();
+      closeBlockquote();
+      html.push("<dl>");
+      html.push(`<dt>${inlineParse(trimmed, inlineContext)}</dt>`);
+      while (
+        lineIndex + 1 < lines.length &&
+        /^ {0,3}:\s+(.+)$/.test(lines[lineIndex + 1])
+      ) {
+        lineIndex += 1;
+        const definition = lines[lineIndex].replace(/^ {0,3}:\s+/, "");
+        html.push(`<dd>${inlineParse(definition, inlineContext)}</dd>`);
+      }
+      html.push("</dl>");
       continue;
     }
 
@@ -464,6 +620,7 @@ function markdownToHtml(markdown) {
   if (inCodeBlock) {
     html.push("</code></pre>");
   }
+  renderFootnotes();
 
   return html.join("\n");
 }
