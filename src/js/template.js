@@ -5,7 +5,7 @@ function templateHtml({
   nav,
   content,
   backlinks,
-  styleHref,
+  styleCss,
   siteTitle,
   footerText,
 }) {
@@ -15,7 +15,9 @@ function templateHtml({
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)} | ${escapeHtml(siteTitle)}</title>
-  <link rel="stylesheet" href="${styleHref}" />
+  <style>
+${styleCss}
+  </style>
 </head>
 <body>
   <header class="site-header">

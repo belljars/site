@@ -17,13 +17,6 @@ async function copyDir(src, dest) {
 }
 
 async function writeAssets(outputDir = config.outputDir) {
-  const assetsDir = path.join(outputDir, "assets");
-  const cssPath = path.join(config.rootDir, "src", "css", "base.css");
-  const css = await fs.readFile(cssPath, "utf8");
-
-  await fs.mkdir(assetsDir, { recursive: true });
-  await fs.writeFile(path.join(assetsDir, "style.css"), css, "utf8");
-
   try {
     await fs.access(config.fontDir);
     const outputFontDir = path.join(outputDir, "font");

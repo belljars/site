@@ -9,6 +9,30 @@ const { templateHtml } = require("./template");
 const { writeAssets } = require("./assets");
 const { escapeHtml, toPosixPath, relativeLink } = require("./utils");
 
+function rewriteCssUrls(css, pagePath, stylesheetPath) {
+  return css.replace(/url\(([^)]+)\)/g, (match, rawUrl) => {
+    const trimmedUrl = rawUrl.trim();
+    const quote = trimmedUrl.startsWith('"') || trimmedUrl.startsWith("'")
+      ? trimmedUrl[0]
+      : "";
+    const unquotedUrl = quote ? trimmedUrl.slice(1, -1) : trimmedUrl;
+
+    if (
+      /^(?:[a-z]+:|\/\/|#)/i.test(unquotedUrl) ||
+      unquotedUrl.startsWith("/")
+    ) {
+      return match;
+    }
+
+    const absoluteAssetPath = path.resolve(
+      path.dirname(stylesheetPath),
+      unquotedUrl
+    );
+    const pageRelativeUrl = relativeLink(pagePath, absoluteAssetPath);
+    return `url(${quote}${pageRelativeUrl}${quote})`;
+  });
+}
+
 function createIndexEntry(config, siteTitle) {
   return {
     absPath: null,
@@ -166,15 +190,19 @@ async function main() {
       path.join(config.rootDir, `${path.basename(config.outputDir)}-tmp-`)
     );
     const tempAssetsDir = path.join(tempOutputDir, "assets");
+    const cssPath = path.join(config.rootDir, "src", "css", "base.css");
+    const baseCss = await fs.readFile(cssPath, "utf8");
 
     for (const file of fileIndex.values()) {
       const tempOutPath = path.join(
         tempOutputDir,
         path.relative(config.outputDir, file.outPath)
       );
-      const styleHref = relativeLink(
+      const stylesheetPath = path.join(tempAssetsDir, "style.css");
+      const styleCss = rewriteCssUrls(
+        baseCss,
         tempOutPath,
-        path.join(tempAssetsDir, "style.css")
+        stylesheetPath
       );
       const navHtml =
         file.slugLower === indexSlug
@@ -190,7 +218,7 @@ async function main() {
         nav: navHtml,
         content: contentHtml,
         backlinks: null,
-        styleHref,
+        styleCss,
         siteTitle,
         footerText,
       });
@@ -214,4 +242,5 @@ async function main() {
 
 module.exports = {
   main,
+  rewriteCssUrls,
 };
