@@ -14,7 +14,7 @@ function templateHtml({
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)} | ${escapeHtml(siteTitle)}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
 ${styleCss}
   </style>
